@@ -6,8 +6,8 @@
 
 body {
   font-family: 'Roboto', sans-serif;
-  background: #f0f2f5;
-  color: #333;
+  background: #111;
+  color: #eee;
   padding: 20px;
 }
 
@@ -15,23 +15,26 @@ body {
   max-width: 1000px;
   margin: 0 auto;
   text-align: center;
-  background: white;
+  background: #222;
   padding: 30px;
   border-radius: 15px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  box-shadow: 0 0 20px rgba(0,0,0,0.5);
 }
 
 h1 {
   margin-bottom: 20px;
-  color: #1a1a1a;
+  color: #fff;
+  font-size: 24px;
 }
 
 input[type="file"], input[type="datetime-local"], button {
   margin: 10px;
-  padding: 12px 16px;
+  padding: 12px 18px;
   font-size: 16px;
-  border: 2px solid #ddd;
+  border: 2px solid #444;
   border-radius: 8px;
+  background: #333;
+  color: #fff;
 }
 
 button {
@@ -40,22 +43,24 @@ button {
   border: none;
   cursor: pointer;
   font-weight: bold;
+  transition: 0.2s;
 }
 
 button:hover {
   background: #0056b3;
 }
 
-.controls {
-  margin: 20px 0;
-}
-
 #downloadBtn {
   background: #28a745;
-  padding: 14px 30px;
+  padding: 14px 32px;
   font-size: 18px;
+  margin-top: 10px;
 }
 
 #downloadBtn:hover {
-  background: #218838;
+  background: #1e7e34;
+}
+
+canvas {
+  border-radius: 8px;
 }
