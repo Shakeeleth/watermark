@@ -78,14 +78,56 @@
       const y = (H - h) / 2;
       ctx.drawImage(uploadedImage, x, y, w, h);
 
-      // === WATERMARK (Exact Match) ===
-      const bottomPadding = 85;
-      const circleY = H - bottomPadding;
-      const textY = circleY + 18;
+// === WATERMARK (PERFECT MATCH) ===
+const bottomPadding = 70;  // Reduced
+const circleY = H - bottomPadding;
+const textY = circleY + 12;  // Text neeche, tight
 
-      const circleXStart = 65;
-      const radius = 14;
-      const spacing = 30;
+const circleXStart = 68;
+const radius = 12;         // Smaller circles
+const spacing = 26;        // Tight spacing
+
+// 4 Circles: ● ● ○ ○
+ctx.fillStyle = '#fff';
+ctx.beginPath();
+ctx.arc(circleXStart, circleY, radius, 0, Math.PI * 2);
+ctx.arc(circleXStart + spacing, circleY, radius, 0, Math.PI * 2);
+ctx.fill();
+
+ctx.strokeStyle = '#fff';
+ctx.lineWidth = 2.5;
+ctx.beginPath();
+ctx.arc(circleXStart + spacing * 2, circleY, radius, 0, Math.PI * 2);
+ctx.arc(circleXStart + spacing * 3, circleY, radius, 0, Math.PI * 2);
+ctx.stroke();
+
+// Text
+const dateStr = formatDate(dateTimePicker.value);
+ctx.font = 'bold 32px Roboto';  // Smaller font
+ctx.fillStyle = '#fff';
+ctx.shadowColor = 'rgba(0,0,0,0.5)';
+ctx.shadowBlur = 2;
+ctx.shadowOffsetX = 1;
+ctx.shadowOffsetY = 1;
+
+const textX = circleXStart + spacing * 4 + 8;  // Tight to circles
+ctx.fillText(dateStr, textX, textY);
+
+ctx.shadowColor = 'transparent';
+
+// Text
+const dateStr = formatDate(dateTimePicker.value);
+ctx.font = 'bold 32px Roboto';  // Smaller font
+ctx.fillStyle = '#fff';
+ctx.shadowColor = 'rgba(0,0,0,0.5)';
+ctx.shadowBlur = 2;
+ctx.shadowOffsetX = 1;
+ctx.shadowOffsetY = 1;
+
+const textX = circleXStart + spacing * 4 + 8;  // Tight to circles
+ctx.fillText(dateStr, textX, textY);
+
+ctx.shadowColor = 'transparent';
 
       // 4 Circles: ● ● ○ ○
       ctx.fillStyle = '#fff';
