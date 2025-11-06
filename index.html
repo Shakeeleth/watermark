@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Photo Editor with Logo & Date</title>
+  <title>Photo Editor - Redmi Style</title>
   <link href="style.css" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@700&display=swap" rel="stylesheet">
 </head>
@@ -16,10 +16,10 @@
     <div class="controls" id="dateControls" style="display:none;">
       <label>Select Date & Time:</label>
       <input type="datetime-local" id="dateTimePicker" />
-      <button id="applyBtn">Apply & Generate</button>
+      <button id="applyBtn">Generate</button>
     </div>
 
-    <canvas id="canvas" width="963" height="1280" style="display:none; margin:20px 0; border:1px solid #ccc;"></canvas>
+    <canvas id="canvas" width="963" height="1280" style="display:none; margin:20px auto; border:1px solid #333; max-width:100%;"></canvas>
     
     <button id="downloadBtn" style="display:none;">Download JPG</button>
   </div>
@@ -37,7 +37,8 @@
 
     // Load logo
     const logo = new Image();
-    logo.src = 'logo.png'; // GitHub pe upload karna
+    logo.src = 'logo.png';
+    logo.onload = () => console.log("Logo loaded");
 
     photoInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
@@ -65,48 +66,54 @@
     applyBtn.addEventListener('click', generateImage);
 
     function generateImage() {
-      if (!uploadedImage) return;
+      if (!uploadedImage || !logo.complete) return;
 
-      const targetW = 963;
-      const targetH = 1280;
+      const W = 963;
+      const H = 1280;
 
-      // Clear canvas
+      // Black background
       ctx.fillStyle = '#000';
-      ctx.fillRect(0, 0, targetW, targetH);
+      ctx.fillRect(0, 0, W, H);
 
-      // Calculate scaling to cover entire canvas
-      const scale = Math.max(targetW / uploadedImage.width, targetH / uploadedImage.height);
-      const newW = uploadedImage.width * scale;
-      const newH = uploadedImage.height * scale;
-      const offsetX = (targetW - newW) / 2;
-      const offsetY = (targetH - newH) / 2;
+      // Cover crop (resize + crop to fill)
+      const scale = Math.max(W / uploadedImage.width, H / uploadedImage.height);
+      const w = uploadedImage.width * scale;
+      const h = uploadedImage.height * scale;
+      const x = (W - w) / 2;
+      const y = (H - h) / 2;
+      ctx.drawImage(uploadedImage, x, y, w, h);
 
-      // Draw cropped & scaled image
-      ctx.drawImage(uploadedImage, offsetX, offsetY, newW, newH);
+      // === LOGO & TEXT AT BOTTOM ===
+      const bottomPadding = 60;
+      const logoSize = 140; // Bigger logo
+      const logoY = H - bottomPadding - logoSize;
+      const logoX = 60;
 
-      // Add logo
-      const logoSize = 180;
-      const logoX = 40;
-      const logoY = targetH - logoSize - 40;
+      // Draw 3 dots
+      ctx.font = 'bold 60px Roboto';
+      ctx.fillStyle = '#fff';
+      ctx.fillText('●●●', logoX - 50, H - bottomPadding - 20);
+
+      // Draw logo
       ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
 
-      // Add text
+      // Draw text
       const dateStr = formatDate(dateTimePicker.value);
       ctx.font = 'bold 48px Roboto';
       ctx.fillStyle = '#fff';
-      ctx.shadowColor = 'rgba(0,0,0,0.8)';
-      ctx.shadowBlur = 4;
-      ctx.shadowOffsetX = 2;
-      ctx.shadowOffsetY = 2;
+      ctx.shadowColor = 'rgba(0,0,0,0.7)';
+      ctx.shadowBlur = 3;
+      ctx.shadowOffsetX = 1;
+      ctx.shadowOffsetY = 1;
 
-      const textX = logoX + logoSize + 20;
-      const textY = logoY + logoSize / 2 + 15;
+      const textX = logoX + logoSize + 25;
+      const textY = logoY + logoSize / 2 + 18;
       ctx.fillText(dateStr, textX, textY);
 
-      // Cleanup shadow
+      // Reset shadow
       ctx.shadowColor = 'transparent';
 
-      // Show canvas & download
+      // Show result
       canvas.style.display = 'block';
       downloadBtn.style.display = 'block';
     }
@@ -116,10 +123,11 @@
       const day = String(d.getDate()).padStart(2, '0');
       const month = String(d.getMonth() + 1).padStart(2, '0');
       const year = String(d.getFullYear()).slice(-2);
-      const hours = d.getHours() % 12 || 12;
+      const hours = d.getHours();
       const minutes = String(d.getMinutes()).padStart(2, '0');
-      const ampm = d.getHours() >= 12 ? 'PM' : 'AM';
-      return `REDMI 10 PRIME | ${day}/${month}/${year} ${hours}:${minutes} ${ampm}`;
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      const displayHour = hours % 12 || 12;
+      return `REDMI 10 PRIME | ${day}/${month}/${year} ${displayHour}:${minutes} ${ampm}`;
     }
 
     downloadBtn.addEventListener('click', () => {
@@ -127,7 +135,7 @@
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'edited-photo.jpg';
+        a.download = 'redmi-photo.jpg';
         a.click();
         URL.revokeObjectURL(url);
       }, 'image/jpeg', 0.95);
