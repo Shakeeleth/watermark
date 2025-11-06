@@ -2,143 +2,21 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Redmi Watermark Generator</title>
-  <link href="style.css" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@700&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Photo Overlay Tool</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="container">
-    <h1>Upload Photo & Add Redmi Watermark</h1>
-
-    <input type="file" id="photoInput" accept="image/*" />
-    
-    <div class="controls" id="dateControls" style="display:none;">
-      <label>Select Date & Time:</label>
-      <input type="datetime-local" id="dateTimePicker" />
-      <button id="applyBtn">Generate</button>
-    </div>
-
-    <canvas id="canvas" width="963" height="1280" style="display:none; margin:20px auto; border:1px solid #333; max-width:100%; border-radius:8px;"></canvas>
-    
-    <button id="downloadBtn" style="display:none;">Download JPG</button>
+    <h1>Photo Overlay Generator</h1>
+    <input type="file" id="imageUpload" accept="image/*" />
+    <input type="text" id="userName" placeholder="Enter your name" />
+    <input type="datetime-local" id="dateTime" />
+    <button onclick="generateImage()">Generate Image</button>
+    <canvas id="canvas"></canvas>
+    <a id="downloadLink" download="output.jpg">Download Image</a>
   </div>
 
-  <script>
-    const photoInput = document.getElementById('photoInput');
-    const dateTimePicker = document.getElementById('dateTimePicker');
-    const applyBtn = document.getElementById('applyBtn');
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
-    const downloadBtn = document.getElementById('downloadBtn');
-    const dateControls = document.getElementById('dateControls');
-
-    let uploadedImage = null;
-
-    photoInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        uploadedImage = new Image();
-        uploadedImage.onload = () => {
-          dateControls.style.display = 'block';
-          setDefaultDateTime();
-        };
-        uploadedImage.src = ev.target.result;
-      };
-      reader.readAsDataURL(file);
-    });
-
-    function setDefaultDateTime() {
-      const now = new Date();
-      const offset = now.getTimezoneOffset() * 60000;
-      const local = new Date(now - offset);
-      dateTimePicker.value = local.toISOString().slice(0, 16);
-    }
-
-    applyBtn.addEventListener('click', generateImage);
-
-    function generateImage() {
-      if (!uploadedImage) return;
-
-      const W = 963;
-      const H = 1280;
-
-      // Black background
-      ctx.fillStyle = '#000';
-      ctx.fillRect(0, 0, W, H);
-
-      // Cover crop (resize + center crop)
-      const scale = Math.max(W / uploadedImage.width, H / uploadedImage.height);
-      const w = uploadedImage.width * scale;
-      const h = uploadedImage.height * scale;
-      const x = (W - w) / 2;
-      const y = (H - h) / 2;
-      ctx.drawImage(uploadedImage, x, y, w, h);
-
-      // === WATERMARK (Pixel-Perfect Match) ===
-      const bottomPadding = 70;
-      const circleY = H - bottomPadding;
-      const textY = circleY + 12;
-
-      const circleXStart = 68;
-      const radius = 12;
-      const spacing = 26;
-
-      // Filled circles (first two)
-      ctx.fillStyle = '#fff';
-      ctx.beginPath();
-      ctx.arc(circleXStart, circleY, radius, 0, Math.PI * 2);
-      ctx.arc(circleXStart + spacing, circleY, radius, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Outline circles (last two)
-      ctx.strokeStyle = '#fff';
-      ctx.lineWidth = 2.5;
-      ctx.beginPath();
-      ctx.arc(circleXStart + spacing * 2, circleY, radius, 0, Math.PI * 2);
-      ctx.arc(circleXStart + spacing * 3, circleY, radius, 0, Math.PI * 2);
-      ctx.stroke();
-
-      // Text
-      const dateStr = formatDate(dateTimePicker.value);
-      ctx.font = 'bold 32px Roboto';
-      ctx.fillStyle = '#fff';
-      ctx.shadowColor = 'rgba(0,0,0,0.5)';
-      ctx.shadowBlur = 2;
-      ctx.shadowOffsetX = 1;
-      ctx.shadowOffsetY = 1;
-      ctx.fillText(dateStr, circleXStart + spacing * 4 + 8, textY);
-      ctx.shadowColor = 'transparent';
-
-      // Show result
-      canvas.style.display = 'block';
-      downloadBtn.style.display = 'block';
-    }
-
-    function formatDate(dateTimeStr) {
-      const d = new Date(dateTimeStr);
-      const day = String(d.getDate()).padStart(2, '0');
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const year = String(d.getFullYear()).slice(-2);
-      const hours = d.getHours();
-      const minutes = String(d.getMinutes()).padStart(2, '0');
-      const displayHour = hours % 12 || 12;
-      return `REDMI 10 PRIME | ${day}/${month}/${year} ${displayHour}:${minutes}`;
-    }
-
-    downloadBtn.addEventListener('click', () => {
-      canvas.toBlob((blob) => {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'redmi-photo.jpg';
-        a.click();
-        URL.revokeObjectURL(url);
-      }, 'image/jpeg', 0.95);
-    });
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
