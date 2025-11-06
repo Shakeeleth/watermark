@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Photo Editor - Redmi Style</title>
+  <title>Redmi Watermark Generator</title>
   <link href="style.css" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@700&display=swap" rel="stylesheet">
 </head>
 <body>
   <div class="container">
-    <h1>Upload Photo & Add Logo + Date</h1>
+    <h1>Upload Photo & Add Redmi Watermark</h1>
 
     <input type="file" id="photoInput" accept="image/*" />
     
@@ -19,7 +19,7 @@
       <button id="applyBtn">Generate</button>
     </div>
 
-    <canvas id="canvas" width="963" height="1280" style="display:none; margin:20px auto; border:1px solid #333; max-width:100%;"></canvas>
+    <canvas id="canvas" width="963" height="1280" style="display:none; margin:20px auto; border:1px solid #333; max-width:100%; border-radius:8px;"></canvas>
     
     <button id="downloadBtn" style="display:none;">Download JPG</button>
   </div>
@@ -34,11 +34,6 @@
     const dateControls = document.getElementById('dateControls');
 
     let uploadedImage = null;
-
-    // Load logo
-    const logo = new Image();
-    logo.src = 'logo.png';
-    logo.onload = () => console.log("Logo loaded");
 
     photoInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
@@ -66,7 +61,7 @@
     applyBtn.addEventListener('click', generateImage);
 
     function generateImage() {
-      if (!uploadedImage || !logo.complete) return;
+      if (!uploadedImage) return;
 
       const W = 963;
       const H = 1280;
@@ -75,7 +70,7 @@
       ctx.fillStyle = '#000';
       ctx.fillRect(0, 0, W, H);
 
-      // Cover crop (resize + crop to fill)
+      // Cover crop
       const scale = Math.max(W / uploadedImage.width, H / uploadedImage.height);
       const w = uploadedImage.width * scale;
       const h = uploadedImage.height * scale;
@@ -83,21 +78,32 @@
       const y = (H - h) / 2;
       ctx.drawImage(uploadedImage, x, y, w, h);
 
-      // === LOGO & TEXT AT BOTTOM ===
-      const bottomPadding = 60;
-      const logoSize = 140; // Bigger logo
-      const logoY = H - bottomPadding - logoSize;
-      const logoX = 60;
+      // === DRAW WATERMARK ===
+      const bottomPadding = 70;
+      const iconY = H - bottomPadding - 10;
+      const textY = iconY + 25;
 
-      // Draw 3 dots
-      ctx.font = 'bold 60px Roboto';
+      // 2 Filled + 2 Outline Circles
+      const circleX = 70;
+      const radius = 18;
+      const spacing = 38;
+
+      // Filled circles
       ctx.fillStyle = '#fff';
-      ctx.fillText('●●●', logoX - 50, H - bottomPadding - 20);
+      ctx.beginPath();
+      ctx.arc(circleX, iconY, radius, 0, Math.PI * 2);
+      ctx.arc(circleX + spacing, iconY, radius, 0, Math.PI * 2);
+      ctx.fill();
 
-      // Draw logo
-      ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
+      // Outline circles
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.arc(circleX + spacing * 2, iconY, radius, 0, Math.PI * 2);
+      ctx.arc(circleX + spacing * 3, iconY, radius, 0, Math.PI * 2);
+      ctx.stroke();
 
-      // Draw text
+      // Text
       const dateStr = formatDate(dateTimePicker.value);
       ctx.font = 'bold 48px Roboto';
       ctx.fillStyle = '#fff';
@@ -106,14 +112,13 @@
       ctx.shadowOffsetX = 1;
       ctx.shadowOffsetY = 1;
 
-      const textX = logoX + logoSize + 25;
-      const textY = logoY + logoSize / 2 + 18;
+      const textX = circleX + spacing * 4 + 10;
       ctx.fillText(dateStr, textX, textY);
 
       // Reset shadow
       ctx.shadowColor = 'transparent';
 
-      // Show result
+      // Show
       canvas.style.display = 'block';
       downloadBtn.style.display = 'block';
     }
@@ -135,7 +140,7 @@
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'redmi-photo.jpg';
+        a.download = 'redmi-watermark.jpg';
         a.click();
         URL.revokeObjectURL(url);
       }, 'image/jpeg', 0.95);
