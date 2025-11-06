@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Photo Editor with Logo & Date</title>
+  <link href="style.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <h1>Upload Photo & Add Logo + Date</h1>
+
+    <input type="file" id="photoInput" accept="image/*" />
+    
+    <div class="controls" id="dateControls" style="display:none;">
+      <label>Select Date & Time:</label>
+      <input type="datetime-local" id="dateTimePicker" />
+      <button id="applyBtn">Apply & Generate</button>
+    </div>
+
+    <canvas id="canvas" width="963" height="1280" style="display:none; margin:20px 0; border:1px solid #ccc;"></canvas>
+    
+    <button id="downloadBtn" style="display:none;">Download JPG</button>
+  </div>
+
+  <script>
+    const photoInput = document.getElementById('photoInput');
+    const dateTimePicker = document.getElementById('dateTimePicker');
+    const applyBtn = document.getElementById('applyBtn');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const dateControls = document.getElementById('dateControls');
+
+    let uploadedImage = null;
+
+    // Load logo
+    const logo = new Image();
+    logo.src = 'logo.png'; // GitHub pe upload karna
+
+    photoInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        uploadedImage = new Image();
+        uploadedImage.onload = () => {
+          dateControls.style.display = 'block';
+          setDefaultDateTime();
+        };
+        uploadedImage.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    function setDefaultDateTime() {
+      const now = new Date();
+      const offset = now.getTimezoneOffset() * 60000;
+      const local = new Date(now - offset);
+      dateTimePicker.value = local.toISOString().slice(0, 16);
+    }
+
+    applyBtn.addEventListener('click', generateImage);
+
+    function generateImage() {
+      if (!uploadedImage) return;
+
+      const targetW = 963;
+      const targetH = 1280;
+
+      // Clear canvas
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, targetW, targetH);
+
+      // Calculate scaling to cover entire canvas
+      const scale = Math.max(targetW / uploadedImage.width, targetH / uploadedImage.height);
+      const newW = uploadedImage.width * scale;
+      const newH = uploadedImage.height * scale;
+      const offsetX = (targetW - newW) / 2;
+      const offsetY = (targetH - newH) / 2;
+
+      // Draw cropped & scaled image
+      ctx.drawImage(uploadedImage, offsetX, offsetY, newW, newH);
+
+      // Add logo
+      const logoSize = 180;
+      const logoX = 40;
+      const logoY = targetH - logoSize - 40;
+      ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
+
+      // Add text
+      const dateStr = formatDate(dateTimePicker.value);
+      ctx.font = 'bold 48px Roboto';
+      ctx.fillStyle = '#fff';
+      ctx.shadowColor = 'rgba(0,0,0,0.8)';
+      ctx.shadowBlur = 4;
+      ctx.shadowOffsetX = 2;
+      ctx.shadowOffsetY = 2;
+
+      const textX = logoX + logoSize + 20;
+      const textY = logoY + logoSize / 2 + 15;
+      ctx.fillText(dateStr, textX, textY);
+
+      // Cleanup shadow
+      ctx.shadowColor = 'transparent';
+
+      // Show canvas & download
+      canvas.style.display = 'block';
+      downloadBtn.style.display = 'block';
+    }
+
+    function formatDate(dateTimeStr) {
+      const d = new Date(dateTimeStr);
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const year = String(d.getFullYear()).slice(-2);
+      const hours = d.getHours() % 12 || 12;
+      const minutes = String(d.getMinutes()).padStart(2, '0');
+      const ampm = d.getHours() >= 12 ? 'PM' : 'AM';
+      return `REDMI 10 PRIME | ${day}/${month}/${year} ${hours}:${minutes} ${ampm}`;
+    }
+
+    downloadBtn.addEventListener('click', () => {
+      canvas.toBlob((blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'edited-photo.jpg';
+        a.click();
+        URL.revokeObjectURL(url);
+      }, 'image/jpeg', 0.95);
+    });
+  </script>
+</body>
+</html>
