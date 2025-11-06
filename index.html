@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Redmi Watermark Generator</title>
+  <title>Redmi Watermark - Perfect</title>
   <link href="style.css" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@700&display=swap" rel="stylesheet">
 </head>
@@ -78,41 +78,39 @@
       const y = (H - h) / 2;
       ctx.drawImage(uploadedImage, x, y, w, h);
 
-      // === DRAW WATERMARK ===
-      const bottomPadding = 70;
-      const iconY = H - bottomPadding - 10;
-      const textY = iconY + 25;
+      // === WATERMARK (Exact Match) ===
+      const bottomPadding = 85;
+      const circleY = H - bottomPadding;
+      const textY = circleY + 18;
 
-      // 2 Filled + 2 Outline Circles
-      const circleX = 70;
-      const radius = 18;
-      const spacing = 38;
+      const circleXStart = 65;
+      const radius = 14;
+      const spacing = 30;
 
-      // Filled circles
+      // 4 Circles: ● ● ○ ○
       ctx.fillStyle = '#fff';
       ctx.beginPath();
-      ctx.arc(circleX, iconY, radius, 0, Math.PI * 2);
-      ctx.arc(circleX + spacing, iconY, radius, 0, Math.PI * 2);
+      ctx.arc(circleXStart, circleY, radius, 0, Math.PI * 2);
+      ctx.arc(circleXStart + spacing, circleY, radius, 0, Math.PI * 2);
       ctx.fill();
 
-      // Outline circles
       ctx.strokeStyle = '#fff';
-      ctx.lineWidth = 4;
+      ctx.lineWidth = 3;
       ctx.beginPath();
-      ctx.arc(circleX + spacing * 2, iconY, radius, 0, Math.PI * 2);
-      ctx.arc(circleX + spacing * 3, iconY, radius, 0, Math.PI * 2);
+      ctx.arc(circleXStart + spacing * 2, circleY, radius, 0, Math.PI * 2);
+      ctx.arc(circleXStart + spacing * 3, circleY, radius, 0, Math.PI * 2);
       ctx.stroke();
 
-      // Text
+      // Text: REDMI 10 PRIME | 25/10/25 11:49
       const dateStr = formatDate(dateTimePicker.value);
-      ctx.font = 'bold 48px Roboto';
+      ctx.font = 'bold 36px Roboto';
       ctx.fillStyle = '#fff';
-      ctx.shadowColor = 'rgba(0,0,0,0.7)';
-      ctx.shadowBlur = 3;
+      ctx.shadowColor = 'rgba(0,0,0,0.6)';
+      ctx.shadowBlur = 2;
       ctx.shadowOffsetX = 1;
       ctx.shadowOffsetY = 1;
 
-      const textX = circleX + spacing * 4 + 10;
+      const textX = circleXStart + spacing * 4 + 15;
       ctx.fillText(dateStr, textX, textY);
 
       // Reset shadow
@@ -132,7 +130,7 @@
       const minutes = String(d.getMinutes()).padStart(2, '0');
       const ampm = hours >= 12 ? 'PM' : 'AM';
       const displayHour = hours % 12 || 12;
-      return `REDMI 10 PRIME | ${day}/${month}/${year} ${displayHour}:${minutes} ${ampm}`;
+      return `REDMI 10 PRIME | ${day}/${month}/${year} ${displayHour}:${minutes}`;
     }
 
     downloadBtn.addEventListener('click', () => {
@@ -140,7 +138,7 @@
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'redmi-watermark.jpg';
+        a.download = 'redmi-photo.jpg';
         a.click();
         URL.revokeObjectURL(url);
       }, 'image/jpeg', 0.95);
