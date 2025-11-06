@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Redmi Watermark - Perfect</title>
+  <title>Redmi Watermark Generator</title>
   <link href="style.css" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@700&display=swap" rel="stylesheet">
 </head>
@@ -70,7 +70,7 @@
       ctx.fillStyle = '#000';
       ctx.fillRect(0, 0, W, H);
 
-      // Cover crop
+      // Cover crop (resize + center crop)
       const scale = Math.max(W / uploadedImage.width, H / uploadedImage.height);
       const w = uploadedImage.width * scale;
       const h = uploadedImage.height * scale;
@@ -78,87 +78,42 @@
       const y = (H - h) / 2;
       ctx.drawImage(uploadedImage, x, y, w, h);
 
-// === WATERMARK (PERFECT MATCH) ===
-const bottomPadding = 70;  // Reduced
-const circleY = H - bottomPadding;
-const textY = circleY + 12;  // Text neeche, tight
+      // === WATERMARK (Pixel-Perfect Match) ===
+      const bottomPadding = 70;
+      const circleY = H - bottomPadding;
+      const textY = circleY + 12;
 
-const circleXStart = 68;
-const radius = 12;         // Smaller circles
-const spacing = 26;        // Tight spacing
+      const circleXStart = 68;
+      const radius = 12;
+      const spacing = 26;
 
-// 4 Circles: ● ● ○ ○
-ctx.fillStyle = '#fff';
-ctx.beginPath();
-ctx.arc(circleXStart, circleY, radius, 0, Math.PI * 2);
-ctx.arc(circleXStart + spacing, circleY, radius, 0, Math.PI * 2);
-ctx.fill();
-
-ctx.strokeStyle = '#fff';
-ctx.lineWidth = 2.5;
-ctx.beginPath();
-ctx.arc(circleXStart + spacing * 2, circleY, radius, 0, Math.PI * 2);
-ctx.arc(circleXStart + spacing * 3, circleY, radius, 0, Math.PI * 2);
-ctx.stroke();
-
-// Text
-const dateStr = formatDate(dateTimePicker.value);
-ctx.font = 'bold 32px Roboto';  // Smaller font
-ctx.fillStyle = '#fff';
-ctx.shadowColor = 'rgba(0,0,0,0.5)';
-ctx.shadowBlur = 2;
-ctx.shadowOffsetX = 1;
-ctx.shadowOffsetY = 1;
-
-const textX = circleXStart + spacing * 4 + 8;  // Tight to circles
-ctx.fillText(dateStr, textX, textY);
-
-ctx.shadowColor = 'transparent';
-
-// Text
-const dateStr = formatDate(dateTimePicker.value);
-ctx.font = 'bold 32px Roboto';  // Smaller font
-ctx.fillStyle = '#fff';
-ctx.shadowColor = 'rgba(0,0,0,0.5)';
-ctx.shadowBlur = 2;
-ctx.shadowOffsetX = 1;
-ctx.shadowOffsetY = 1;
-
-const textX = circleXStart + spacing * 4 + 8;  // Tight to circles
-ctx.fillText(dateStr, textX, textY);
-
-ctx.shadowColor = 'transparent';
-
-      // 4 Circles: ● ● ○ ○
+      // Filled circles (first two)
       ctx.fillStyle = '#fff';
       ctx.beginPath();
       ctx.arc(circleXStart, circleY, radius, 0, Math.PI * 2);
       ctx.arc(circleXStart + spacing, circleY, radius, 0, Math.PI * 2);
       ctx.fill();
 
+      // Outline circles (last two)
       ctx.strokeStyle = '#fff';
-      ctx.lineWidth = 3;
+      ctx.lineWidth = 2.5;
       ctx.beginPath();
       ctx.arc(circleXStart + spacing * 2, circleY, radius, 0, Math.PI * 2);
       ctx.arc(circleXStart + spacing * 3, circleY, radius, 0, Math.PI * 2);
       ctx.stroke();
 
-      // Text: REDMI 10 PRIME | 25/10/25 11:49
+      // Text
       const dateStr = formatDate(dateTimePicker.value);
-      ctx.font = 'bold 36px Roboto';
+      ctx.font = 'bold 32px Roboto';
       ctx.fillStyle = '#fff';
-      ctx.shadowColor = 'rgba(0,0,0,0.6)';
+      ctx.shadowColor = 'rgba(0,0,0,0.5)';
       ctx.shadowBlur = 2;
       ctx.shadowOffsetX = 1;
       ctx.shadowOffsetY = 1;
-
-      const textX = circleXStart + spacing * 4 + 15;
-      ctx.fillText(dateStr, textX, textY);
-
-      // Reset shadow
+      ctx.fillText(dateStr, circleXStart + spacing * 4 + 8, textY);
       ctx.shadowColor = 'transparent';
 
-      // Show
+      // Show result
       canvas.style.display = 'block';
       downloadBtn.style.display = 'block';
     }
@@ -170,7 +125,6 @@ ctx.shadowColor = 'transparent';
       const year = String(d.getFullYear()).slice(-2);
       const hours = d.getHours();
       const minutes = String(d.getMinutes()).padStart(2, '0');
-      const ampm = hours >= 12 ? 'PM' : 'AM';
       const displayHour = hours % 12 || 12;
       return `REDMI 10 PRIME | ${day}/${month}/${year} ${displayHour}:${minutes}`;
     }
